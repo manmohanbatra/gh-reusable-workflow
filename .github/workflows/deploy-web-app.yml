@@ -14,13 +14,18 @@ on:
       artifact-to-deploy:
         required: true
         type: string
+      env-name:
+        required: true
+        type: string
+      env-url:
+        required: true
+        type: string
       app-name:
         required: true
         type: string
       app-slot:
         required: false
         type: string
-        default: 
     secrets:
       azure-credentials:
         required: true
@@ -29,9 +34,13 @@ on:
 jobs:
   deploy-web-app:
     
-    name: Deploy to ${{ inputs.environment-name }}
+    name: Deploy to ${{ inputs.env-name }}
     
     runs-on: ${{ inputs.runs-on }}
+    
+    environment: 
+      name: ${{ inputs.env-name }}
+      url: ${{ inputs.env-url }}
     
     steps:
     
