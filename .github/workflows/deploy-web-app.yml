@@ -1,0 +1,62 @@
+name: Deploy Web App
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        required: true
+        type: string
+        default: ubuntu-latest
+      dotnet-version:
+        required: true
+        type: string
+        default: 5.0.x
+      artifact-to-deploy:
+        required: true
+        type: string
+      app-name:
+        required: true
+        type: string
+      app-slot:
+        required: false
+        type: string
+        default: 
+    secrets:
+      azure-credentials:
+        required: true
+    
+
+jobs:
+  deploy-web-app:
+    
+    name: Deploy to ${{ inputs.environment-name }}
+    
+    runs-on: ${{ inputs.runs-on }}
+    
+    steps:
+    
+    - name: Setup .NET Core 5
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: ${{ inputs.donet-version }}
+        
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.azure-credentials }}
+        
+    - name: Download a Build Artifact
+      uses: actions/download-artifact@v2.0.8
+      with:
+        # Artifact name
+        name: ${{ inputs.artifact-to-deploy }}
+        # Destination path
+        path: ${{ inputs.artifact-to-deploy }}
+        
+    # Deploy to Azure Web apps
+    - name: 'Run Azure webapp deploy action using publish profile credentials'
+      uses: azure/webapps-deploy@v2
+      with: 
+        app-name: ${{ inputs.app-name }}
+        package: ${{ inputs.artifact-to-deploy }}
+        slot-name: ${{ inputs.app-slot }}   
